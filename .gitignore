@@ -1,8 +1,2 @@
-__pycache__/
-*.py[cod]
-*$py.class
-.env
-videos/
-.venv/
-dist/
-*.egg-info/ 
+
+docker-compose.yaml

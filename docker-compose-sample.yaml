@@ -1,0 +1,10 @@
+version: '3'
+services:
+  nest_video_backup:
+    container_name: nest_video_backup
+    restart: unless-stopped
+    user: 1000:1000
+    build: .
+    volumes:
+      - [Path to your storage]:/videos
+      - [Path to your config folder]:/config
