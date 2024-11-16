@@ -6,6 +6,7 @@ from io import BytesIO
 import pytz
 import datetime
 import os
+import shutil
 
 # Get the PUID and PGID environment variables
 PUID = int(os.environ.get('PUID', 1000))
@@ -20,6 +21,19 @@ class DataEventsSync(object):
     def __init__(self, nest_camera_devices) -> None:
         self._nest_camera_devices = nest_camera_devices
         self._recent_events = set()
+
+    def _cleanup_empty_folders(self, base_path):
+        """Recursively remove empty folders"""
+        for root, dirs, files in os.walk(base_path, topdown=False):
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                try:
+                    # Check if directory is empty (no files and no non-empty subdirectories)
+                    if not os.listdir(dir_path):
+                        os.rmdir(dir_path)
+                        logger.debug(f"Removed empty directory: {dir_path}")
+                except OSError as e:
+                    logger.warning(f"Error removing directory {dir_path}: {e}")
 
     def sync_single_nest_camera(self, nest_device : NestDoorbellDevice):
 
@@ -67,6 +81,10 @@ class DataEventsSync(object):
 
             self._recent_events.add(camera_event_obj.event_id)
 
+        # After processing all events, cleanup empty folders
+        device_base_path = os.path.join(BASE_DIRECTORY, nest_device.device_name)
+        self._cleanup_empty_folders(device_base_path)
+        
         downloaded = len(all_recent_camera_events) - skipped
         logger.info(f"[{nest_device.device_id}] Downloaded: {downloaded}, skipped (already downloaded): {skipped}")
 
