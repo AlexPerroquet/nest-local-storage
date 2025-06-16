@@ -44,7 +44,7 @@ LOCAL_TIMEZONE = os.environ.get("TIMEZONE", "America/Los_Angeles")
 
 assert GOOGLE_MASTER_TOKEN and GOOGLE_USERNAME 
 
-def main():
+async def main():
 
     logger.info("Welcome to the Google Nest Doorbell Local Storage Downloader")
 
@@ -77,9 +77,12 @@ def main():
     scheduler.start()
 
     try:
-        asyncio.get_event_loop().run_forever()
+        # Keep the program running
+        while True:
+            await asyncio.sleep(1)
     except (KeyboardInterrupt, SystemExit):
-        pass
+        scheduler.shutdown()
+        logger.info("Scheduler stopped.")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
